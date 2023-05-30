@@ -1,0 +1,58 @@
+{% extends "shared/base.html" %}
+
+
+{% block title %} 
+  <title>Stock Market Prediction</title>
+{% endblock %} 
+
+{% block content %} 
+  <div class="container">
+    <h1 class="display-4">Predicting the Stock Market </h1>
+  <div style="margin-top:60px">
+    <img style="margin-left: 20px;" src="{{ url_for('static', path='images/aapl.jpeg')}}">
+  </div>
+    <div style="width:1400px;"" align="center">
+      <button class="btn btn-secondary dropdown-toggle btn-sm top-0 start-50" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+        Symbol
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <li><a class="dropdown-item" href="#">AAPL</a></li>
+        <li><a class="dropdown-item" href="#">MSFT</a></li>
+        <li><a class="dropdown-item" href="#">AMZN</a></li>
+      </ul>
+  </div>
+    <div style="margin-top:100px">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th scope="col">Stock</th>
+            <th scope="col">Batch Model</th>
+            <th scope="col">Stream</th>
+            <th scope="col">Actual</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AAPL</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>MSFT</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>AMZN</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+  </div>
+    <button type="button" class="btn btn-outline-dark btn-sm"> Export CSV </button>
+  </div>
+{% endblock %}
