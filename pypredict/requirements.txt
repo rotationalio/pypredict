@@ -1,3 +1,5 @@
 fastapi
 jinja2
+pyensign
 uvicorn
+websockets
