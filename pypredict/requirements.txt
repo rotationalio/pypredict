@@ -1,5 +1,5 @@
 fastapi
 jinja2
-pyensign
+pyensign>=0.7b0
 uvicorn
 websockets
