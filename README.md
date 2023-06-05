@@ -24,8 +24,7 @@ $ pip install -r pypredict/requirements.txt
 Run the application
 
 ```
-$ cd pypredict
-$ uvicorn main:app --reload
+$ uvicorn pypredict.main:app --reload
 ```
 
 Note: the `reload` flag provides the ability to refresh the application after code changes.  It is not necessary.
