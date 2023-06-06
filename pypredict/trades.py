@@ -7,6 +7,17 @@ from datetime import datetime
 import websockets
 from pyensign.events import Event
 from pyensign.ensign import Ensign
+from river import compose
+from river import linear_model
+from river import preprocessing
+
+
+async def handle_ack(ack):
+    ts = datetime.fromtimestamp(ack.committed.seconds + ack.committed.nanos / 1e9)
+    print(f"Event committed at {ts}")
+
+async def handle_nack(nack):
+    print(f"Could not commit event {nack.id} with error {nack.code}: {nack.error}")
 
 class TradesPublisher:
     """
@@ -49,18 +60,11 @@ class TradesPublisher:
                     while True:
                         message = await websocket.recv()
                         for event in self.message_to_events(json.loads(message)):
-                            await self.ensign.publish(self.topic, event, ack_callback=self.handle_ack, nack_callback=self.handle_nack)
+                            await self.ensign.publish(self.topic, event, ack_callback=handle_ack, nack_callback=handle_nack)
             except websockets.exceptions.ConnectionClosedError as e:
                 # TODO: Make sure reconnect is happening for dropped connections.
                 print(f"Websocket connection closed: {e}")
                 await asyncio.sleep(1)
-
-    async def handle_ack(self, ack):
-        ts = datetime.fromtimestamp(ack.committed.seconds + ack.committed.nanos / 1e9)
-        print(f"Event committed at {ts}")
-
-    async def handle_nack(self, nack):
-        print(f"Could not commit event {nack.id} with error {nack.code}: {nack.error}")
 
     def message_to_events(self, message):
         """
@@ -84,12 +88,15 @@ class TradesPublisher:
 
 class TradesSubscriber:
     """
-    TradesSubscriber subscribes to trading events from Ensign.
+    TradesSubscriber subscribes to trading events from Ensign and runs an
+    online model pipeline and publishes predictions to a new topic.
     """
 
-    def __init__(self, topic="trades"):
-        self.topic = topic
+    def __init__(self, sub_topic="trades", pub_topic="predictions"):
+        self.sub_topic = sub_topic
+        self.pub_topic = pub_topic
         self.ensign = Ensign()
+        self.model = self.build_model()
     
     def run(self):
         """
@@ -98,18 +105,63 @@ class TradesSubscriber:
 
         asyncio.get_event_loop().run_until_complete(self.subscribe())
 
+    def build_model(self):
+        model = compose.Pipeline(
+            ('scale', preprocessing.StandardScaler()),
+            ('lin_reg', linear_model.LinearRegression())
+        )
+        return model
+    
+    def get_timestamp(self, epoch):
+        """
+        converts unix epoch to datetime
+        """
+        epoch_time = epoch / 1000.0
+        timestamp = datetime.fromtimestamp(epoch_time)
+        return timestamp
+    
+    async def run_model_pipeline(self, data):
+        """
+        Run an online model using river.
+        The model will first make a prediction and then
+        continuously learn as it gets new price data.
+        """
+        # convert unix epoch to datetime
+        timestamp = self.get_timestamp(data["timestamp"])
+        # extract the microsecond component and use it as a model feature
+        x = {"microsecond" : timestamp.microsecond}
+        # generate a prediction
+        price_pred = round(self.model.predict_one(x), 4)
+        price = data["price"]
+        print(timestamp, price, price_pred)
+        # pass the actual trade price to the model
+        self.model.learn_one(x, price)
+        # create a message that contains the predicted price and the actual price
+        message = dict()
+        message["symbol"] = data["symbol"]
+        message["timestamp"] = timestamp.isoformat()
+        message["price"] = data["price"]
+        message["price_pred"] = price_pred
+        print(f"prediction message: {message}")
+        # create an Ensign event and publish to the predictions topic
+        event = Event(json.dumps(message).encode("utf-8"), mimetype="application/json")
+        await self.ensign.publish(self.pub_topic, event, ack_callback=handle_ack, nack_callback=handle_nack)
+
     async def subscribe(self):
         """
-        Subscribe to trading events from Ensign.
+        Subscribe to trading events from Ensign and run an
+        online model pipeline and publish predictions to a new topic.
         """
 
         # Get the topic ID from the topic name.
-        topic_id = await self.ensign.topic_id(self.topic)
+        topic_id = await self.ensign.topic_id(self.sub_topic)
 
         # Subscribe to the topic.
         # TODO: Handle dropped stream, but the SDK should really handle this.
         async for event in self.ensign.subscribe(topic_id):
-            print(event)
+            print(f"trade event: {event}")
+            data = json.loads(event.data)
+            await self.run_model_pipeline(data)
 
 if __name__ == "__main__":
     # Run the publisher or subscriber depending on the command line arguments.
