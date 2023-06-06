@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from api.endpoints import homepage, about, data_source, hypothesis, online_learning
+from .endpoints import homepage, about, data_source, hypothesis, online_learning
 
 
 api_router = APIRouter()
