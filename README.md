@@ -21,6 +21,16 @@ Install the required packages
 $ pip install -r pypredict/requirements.txt
 ```
 
+Run the publisher
+```
+$ python pypredict/trades.py publish
+```
+
+Run the subscriber
+```
+$ python pypredict/trades.py subscribe
+```
+
 Run the application
 
 ```
