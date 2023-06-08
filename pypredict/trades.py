@@ -24,7 +24,7 @@ class TradesPublisher:
     TradesPublisher queries an API for trading updates and publishes events to Ensign.
     """
 
-    def __init__(self, symbols=["AAPL"], topic="trades"):
+    def __init__(self, symbols=["AAPL", "MSFT", "AMZN"], topic="trades"):
         self.symbols = symbols
         self.topic = topic
         self.ensign = Ensign()

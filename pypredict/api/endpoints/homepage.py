@@ -43,14 +43,10 @@ class PredictionsSubscriber:
               
 templates = Jinja2Templates(directory=config.TEMPLATE_DIR)
 router = APIRouter()
-# https://stackoverflow.com/questions/73437345/how-to-pass-a-custom-object-to-jinja2-template-using-fastapi
-# https://ron.sh/creating-real-time-charts-with-flask/
-# https://betterprogramming.pub/openai-sse-sever-side-events-streaming-api-733b8ec32897
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    # try this https://stackoverflow.com/questions/51275730/populate-html-table-with-json-data
     subscriber = PredictionsSubscriber()
     async for event in subscriber.subscribe():
         data = json.loads(event.data)
