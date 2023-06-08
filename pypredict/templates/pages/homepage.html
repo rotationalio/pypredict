@@ -20,19 +20,19 @@
         <li><a class="dropdown-item" href="#">MSFT</a></li>
         <li><a class="dropdown-item" href="#">AMZN</a></li>
       </ul>
-  </div>
+   </div>
     <div style="margin-top:100px">
-      <table class="table table-sm">
+      <table id="stocks" class="table table-sm">
         <thead>
           <tr>
             <th scope="col">Stock</th>
             <th scope="col">Batch Model</th>
-            <th scope="col">Stream</th>
+            <th scope="col">Online Model</th>
             <th scope="col">Actual</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
+          <tr id="AAPL">
             <td>AAPL</td>
             <td></td>
             <td></td>
@@ -52,7 +52,15 @@
           </tr>
         </tbody>
       </table>
-  </div>
+    </div>
+      <script>
+        var ws = new WebSocket("ws://localhost:8000/ws");
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data)
+            var tr = document.getElementById(data.symbol);
+            tr.cells[2].innerHTML = data.price_pred;
+            tr.cells[3].innerHTML = data.price;
+        };
+      </script>
     <button type="button" class="btn btn-outline-dark btn-sm"> Export CSV </button>
-  </div>
 {% endblock %}
