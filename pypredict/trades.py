@@ -24,7 +24,7 @@ class TradesPublisher:
     TradesPublisher queries an API for trading updates and publishes events to Ensign.
     """
 
-    def __init__(self, symbols=["AAPL"], topic="trades"):
+    def __init__(self, symbols=["AAPL", "MSFT", "AMZN"], topic="trades"):
         self.symbols = symbols
         self.topic = topic
         self.ensign = Ensign()
@@ -140,8 +140,8 @@ class TradesSubscriber:
         message = dict()
         message["symbol"] = data["symbol"]
         message["timestamp"] = timestamp.isoformat()
-        message["price"] = data["price"]
-        message["price_pred"] = price_pred
+        message["price"] = str(data["price"])
+        message["price_pred"] = str(price_pred)
         print(f"prediction message: {message}")
         # create an Ensign event and publish to the predictions topic
         event = Event(json.dumps(message).encode("utf-8"), mimetype="application/json")
