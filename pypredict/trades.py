@@ -139,7 +139,7 @@ class TradesSubscriber:
         # create a message that contains the predicted price and the actual price
         message = dict()
         message["symbol"] = data["symbol"]
-        message["timestamp"] = timestamp.isoformat()
+        message["time"] = timestamp.strftime("%H:%M:%S")
         message["price"] = str(data["price"])
         message["price_pred"] = str(price_pred)
         print(f"prediction message: {message}")
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     # Run the publisher or subscriber depending on the command line arguments.
     if len(sys.argv) > 1:
         if sys.argv[1] == "publish":
-            publisher = TradesPublisher()
+            publisher = TradesPublisher(symbols=["AAPL", "MSFT", "AMZN"])
             publisher.run()
         elif sys.argv[1] == "subscribe":
             subscriber = TradesSubscriber()
