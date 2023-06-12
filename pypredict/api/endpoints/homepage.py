@@ -54,6 +54,7 @@ async def websocket_endpoint(websocket: WebSocket):
         price_dict["symbol"] = data["symbol"]
         price_dict["price_pred"] = data["price_pred"]
         price_dict["price"] = data["price"]
+        price_dict["time"] = data["time"]
         await websocket.send_json(price_dict)
 
 @router.get("/")
