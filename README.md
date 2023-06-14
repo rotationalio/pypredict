@@ -38,3 +38,13 @@ $ uvicorn pypredict.main:app --reload
 ```
 
 Note: the `reload` flag provides the ability to refresh the application after code changes.  It is not necessary.
+
+## Containerizing the application
+
+Run docker container
+
+```
+$ docker-compose up
+```
+
+Go to http://localhost to view the application

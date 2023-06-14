@@ -7,14 +7,13 @@
 
 {% block content %} 
   <div class="container">
-    <h1 class="display-4">Predicting the Stock Market </h1>
+    <h6 class="display-4">Predicting the Stock Market </h6>
     <canvas id="chart"></canvas>
-    <div style="margin-top:100px">
+    <div style="margin-top:25px">
       <table id="stocks" class="table table-sm">
         <thead>
           <tr>
             <th scope="col">Stock</th>
-            <th scope="col">Batch Model Price</th>
             <th scope="col">Online Model Price</th>
             <th scope="col">Actual Price</th>
           </tr>
@@ -24,17 +23,14 @@
             <td>AAPL</td>
             <td></td>
             <td></td>
-            <td></td>
           </tr>
           <tr id="MSFT">
             <td>MSFT</td>
             <td></td>
             <td></td>
-            <td></td>
           </tr>
           <tr id="AMZN">
             <td>AMZN</td>
-            <td></td>
             <td></td>
             <td></td>
           </tr>
@@ -65,7 +61,7 @@
                     display: true,
                     text: "",
                     font: {
-                      size: 50,
+                      size: 30,
                     }
                 },
               },
@@ -85,12 +81,12 @@
             }
           },
         });
-        var ws = new WebSocket("ws://localhost:8000/ws");
+        var ws = new WebSocket("ws://localhost:80/ws");
         ws.onmessage = function(event) {
             var data = JSON.parse(event.data)
             var tr = document.getElementById(data.symbol);
-            tr.cells[2].innerHTML = data.price_pred;
-            tr.cells[3].innerHTML = data.price;
+            tr.cells[1].innerHTML = data.price_pred;
+            tr.cells[2].innerHTML = data.price;
             if (data.symbol == "AAPL") {
               stock_chart.data.labels.push(data.time);
               stock_chart.data.datasets[0].data.push(data.price_pred);

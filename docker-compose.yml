@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  stock_predictor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    links:
+      - subscriber
+    ports:
+      - 80:80
+    environment:
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
+      ENSIGN_CLIENT_ID: ${ENSIGN_CLIENT_ID}
+      ENSIGN_CLIENT_SECRET: ${ENSIGN_CLIENT_SECRET}
+  publisher:
+    build: .
+    command: python pypredict/trades.py publish
+    environment:
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
+      ENSIGN_CLIENT_ID: ${ENSIGN_CLIENT_ID}
+      ENSIGN_CLIENT_SECRET: ${ENSIGN_CLIENT_SECRET}
+  subscriber:
+    build: .
+    container_name: subscriber
+    command: python pypredict/trades.py subscribe
+    environment:
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
+      ENSIGN_CLIENT_ID: ${ENSIGN_CLIENT_ID}
+      ENSIGN_CLIENT_SECRET: ${ENSIGN_CLIENT_SECRET}
+
