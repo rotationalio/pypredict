@@ -8,5 +8,45 @@
 {% block content %} 
   <div class="container">
     <h1 class="display-4">Online Learning</h1>
+    <p></p>
+    <p>Batch learning is the tried and tested method for machine learning. 
+       In many ways this makes sense; it allows data scientists to apply the 
+       scientific method when training models because data sets are static 
+       and well understood. The emergence of Python libraries such as scikit-learn 
+       have also contributed to thinking about modeling in terms of reproducible batches.
+       It is also a common practice to train on a dataset that is as large as possible
+       in order to get the best model performance. 
+      </p>
+      <p>However, there are drawbacks to batch learning.  First and foremost, training on
+         large datasets incurs higher costs on compute and storage.  Second, with the
+         batch learning approach, retraining and redeploying models with new features can 
+         only be done periodically and results in a lag between the availability of
+         the features and making inferences from those features.  To further complicate
+         matters, in today's fast paced world, new features are available within minutes,
+         if not seconds or microseconds.  This results in batch learning models suffering
+         from drift as soon as they are deployed and retraining them on a periodic basis
+         does little to help reduce this problem.
+       </p>
+       <p>It is due to these limitations that online learning models are beginning to gain
+        in popularity.  Online learning models are smaller in size and do not require
+        a lot of data to train on.  In fact, online learning models can learn on new
+        features as soon as they arrive so they are able to quickly react to changing data.
+        This means that they are less susceptible to drift. They also require less compute 
+        and storage because learning is incremental as opposed to batch learning models 
+        where you have to accumulate a lot of data in order to train the model.  While
+        online learning models are less susceptible to drift, it is also much easier to
+        put monitoring in place to catch drift as soon as it occurs. In the batch
+        learning scenario, monitoring, catching, and reacting to drift is a lot more 
+        manual and time consuming.       
+       </p>
+       <p>Here are some resources for you to get started:
+        <ul>
+          <li><a href="https://huyenchip.com/2022/08/03/stream-processing-for-data-scientists.html" class="link-primary">Introduction to streaming for data scientists</a></li>
+          <li><a href="https://riverml.xyz/dev/examples/batch-to-online/" class="link-primary">From batch to online/stream</a></li>
+          <li><a href="https://vowpalwabbit.org/" class="link-primary">Vowpal Wabbit</a></li>
+          <li><a href="https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/" class="link-primary">Streaming 101: The world beyond batch</a></li>     
+        </ul>
+
+       </p>
   </div>
 {% endblock %}

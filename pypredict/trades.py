@@ -133,7 +133,6 @@ class TradesSubscriber:
         # generate a prediction
         price_pred = round(self.model.predict_one(x), 4)
         price = data["price"]
-        print(timestamp, price, price_pred)
         # pass the actual trade price to the model
         self.model.learn_one(x, price)
         # create a message that contains the predicted price and the actual price
@@ -142,7 +141,6 @@ class TradesSubscriber:
         message["time"] = timestamp.strftime("%H:%M:%S")
         message["price"] = str(data["price"])
         message["price_pred"] = str(price_pred)
-        print(f"prediction message: {message}")
         # create an Ensign event and publish to the predictions topic
         event = Event(json.dumps(message).encode("utf-8"), mimetype="application/json")
         await self.ensign.publish(self.pub_topic, event, ack_callback=handle_ack, nack_callback=handle_nack)
@@ -159,7 +157,6 @@ class TradesSubscriber:
         # Subscribe to the topic.
         # TODO: Handle dropped stream, but the SDK should really handle this.
         async for event in self.ensign.subscribe(topic_id):
-            print(f"trade event: {event}")
             data = json.loads(event.data)
             await self.run_model_pipeline(data)
 
