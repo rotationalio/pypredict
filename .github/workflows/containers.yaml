@@ -30,7 +30,6 @@ jobs:
           # list of Docker images to use as basenames for tags
           # this should be configured for each container built
           images: |
-            rotationalio/trades
             gcr.io/rotationalio-habanero/trades
           tags: |
             type=semver,pattern={{raw}}
