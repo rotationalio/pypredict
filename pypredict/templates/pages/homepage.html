@@ -1,99 +1,99 @@
 {% extends "shared/base.html" %}
 
 
-{% block title %} 
-  <title>Stock Market Prediction</title>
-{% endblock %} 
-
-{% block content %} 
-  <div class="container">
-    <h6 class="display-4">Predicting the Stock Market </h6>
-    <canvas id="chart"></canvas>
-    <div style="margin-top:25px">
-      <table id="stocks" class="table table-sm">
-        <thead>
-          <tr>
-            <th scope="col">Stock</th>
-            <th scope="col">Online Model Price</th>
-            <th scope="col">Actual Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr id="AAPL">
-            <td>AAPL</td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr id="MSFT">
-            <td>MSFT</td>
-            <td></td>
-            <td></td>
-          </tr>
-          <tr id="AMZN">
-            <td>AMZN</td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-      <script>
-        const ctx = document.getElementById("chart");
-        const stock_chart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: [],
-            datasets: [
-              {
-                label: "Online Model Price",
-                data: []
-              },
-              {
-                label: "Actual Price",
-                data: []
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins:{
-              title: {
-                    display: true,
-                    text: "",
-                    font: {
-                      size: 30,
-                    }
-                },
-              },
-            scales: {
-              x: {
-                title: {
-                  display: true,
-                  text: "Time"
-                }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: "Price"
-                }
-              }             
-            }
-          },
-        });
-        var ws = new WebSocket("ws://localhost:80/ws");
-        ws.onmessage = function(event) {
-            var data = JSON.parse(event.data)
-            var tr = document.getElementById(data.symbol);
-            tr.cells[1].innerHTML = data.price_pred;
-            tr.cells[2].innerHTML = data.price;
-            if (data.symbol == "AAPL") {
-              stock_chart.data.labels.push(data.time);
-              stock_chart.data.datasets[0].data.push(data.price_pred);
-              stock_chart.data.datasets[1].data.push(data.price);
-              stock_chart.options.plugins.title.text = data.symbol;
-              stock_chart.update();
-            }
-        };
-      </script>
+{% block title %}
+<title>Stock Market Prediction</title>
 {% endblock %}
+
+{% block content %}
+<div class="container">
+  <h6 class="display-4">Predicting the Stock Market </h6>
+  <canvas id="chart"></canvas>
+  <div style="margin-top:25px">
+    <table id="stocks" class="table table-sm">
+      <thead>
+        <tr>
+          <th scope="col">Stock</th>
+          <th scope="col">Online Model Price</th>
+          <th scope="col">Actual Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="AAPL">
+          <td>AAPL</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr id="MSFT">
+          <td>MSFT</td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr id="AMZN">
+          <td>AMZN</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <script>
+    const ctx = document.getElementById("chart");
+    const stock_chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: "Online Model Price",
+            data: []
+          },
+          {
+            label: "Actual Price",
+            data: []
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: {
+            display: true,
+            text: "",
+            font: {
+              size: 30,
+            }
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "Time"
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: "Price"
+            }
+          }
+        }
+      },
+    });
+    var ws = new WebSocket(window.config.WEBSOCKET_URL);
+    ws.onmessage = function (event) {
+      var data = JSON.parse(event.data)
+      var tr = document.getElementById(data.symbol);
+      tr.cells[1].innerHTML = data.price_pred;
+      tr.cells[2].innerHTML = data.price;
+      if (data.symbol == "AAPL") {
+        stock_chart.data.labels.push(data.time);
+        stock_chart.data.datasets[0].data.push(data.price_pred);
+        stock_chart.data.datasets[1].data.push(data.price);
+        stock_chart.options.plugins.title.text = data.symbol;
+        stock_chart.update();
+      }
+    };
+  </script>
+  {% endblock %}

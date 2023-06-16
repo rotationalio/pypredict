@@ -12,8 +12,7 @@ from pypredict.core import config
 
 class PredictionsSubscriber:
     """
-    TradesSubscriber subscribes to trading events from Ensign and runs an
-    online model pipeline and publishes predictions to a new topic.
+    PredictionsSubscriber subscribes to a predictions topic from Ensign.
     """
 
     def __init__(self, topic="predictions"):

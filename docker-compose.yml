@@ -7,9 +7,9 @@ services:
     links:
       - subscriber
     ports:
-      - 80:80
+      - 8000:8000
     environment:
-      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
+      WEBSOCKET_URL: ws://localhost:8000/ws
       ENSIGN_CLIENT_ID: ${ENSIGN_CLIENT_ID}
       ENSIGN_CLIENT_SECRET: ${ENSIGN_CLIENT_SECRET}
   publisher:
@@ -27,4 +27,3 @@ services:
       FINNHUB_API_KEY: ${FINNHUB_API_KEY}
       ENSIGN_CLIENT_ID: ${ENSIGN_CLIENT_ID}
       ENSIGN_CLIENT_SECRET: ${ENSIGN_CLIENT_SECRET}
-
