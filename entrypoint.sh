@@ -7,4 +7,4 @@ CONFIG="{
 echo "window.config = $CONFIG" > /usr/src/app/pypredict/static/js/config.js
 
 # Start the server
-uvicorn pypredict.main:app "--host" "0.0.0.0" "--port" "$SERVER_PORT" "--proxy-headers"
+uvicorn pypredict.main:app "--host" "0.0.0.0" "--port" "$SERVER_PORT" "--proxy-headers" "--forwarded-allow-ips" "*"
