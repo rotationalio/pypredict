@@ -7,14 +7,14 @@ from datetime import datetime
 import websockets
 from pyensign.events import Event
 from pyensign.ensign import Ensign
+from river import optim
 from river import compose
 from river import linear_model
 from river import preprocessing
 
 
 async def handle_ack(ack):
-    ts = datetime.fromtimestamp(ack.committed.seconds + ack.committed.nanos / 1e9)
-    print(f"Event committed at {ts}")
+    _ = datetime.fromtimestamp(ack.committed.seconds + ack.committed.nanos / 1e9)
 
 async def handle_nack(nack):
     print(f"Could not commit event {nack.id} with error {nack.code}: {nack.error}")
