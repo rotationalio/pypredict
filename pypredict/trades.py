@@ -122,9 +122,8 @@ class TradesSubscriber:
     
     async def run_model_pipeline(self, data):
         """
-        Run an online model using river.
-        The model will first make a prediction and then
-        continuously learn as it gets new price data.
+        Train an online model and publish predictions to a new topic.
+        Run your super smart model pipeline here!
         """
         # convert unix epoch to datetime
         timestamp = self.get_timestamp(data["timestamp"])
@@ -135,12 +134,14 @@ class TradesSubscriber:
         price = data["price"]
         # pass the actual trade price to the model
         self.model.learn_one(x, price)
+
         # create a message that contains the predicted price and the actual price
         message = dict()
         message["symbol"] = data["symbol"]
         message["time"] = timestamp.strftime("%H:%M:%S")
         message["price"] = str(data["price"])
         message["price_pred"] = str(price_pred)
+
         # create an Ensign event and publish to the predictions topic
         event = Event(json.dumps(message).encode("utf-8"), mimetype="application/json")
         await self.ensign.publish(self.pub_topic, event, ack_callback=handle_ack, nack_callback=handle_nack)
