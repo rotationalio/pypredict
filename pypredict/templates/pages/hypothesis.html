@@ -1,12 +1,24 @@
 {% extends "shared/base.html" %}
 
 
-{% block title %} 
-  <title>Hypothesis</title>
-{% endblock %} 
+{% block title %}
+<title>Hypothesis</title>
+{% endblock %}
 
-{% block content %} 
-  <div class="container">
-    <h1 class="display-4"> Hypothesis </h1>
-  </div>
+{% block content %}
+<div class="container">
+  <h1 class="display-4"> Hypothesis </h1>
+  <p>Training machine learning models on event streams is an effective way to do machine learning that is
+    more memory efficient and more flexible during deployment, without compromising accuracy measures such as F1 score,
+    FPR/TPR, etc.
+    We set out to test the above hypothesis with the following three evaluation goals in mind:</p>
+  <ol>
+    <li>A model trained on an event stream should be competitive in performance with a model trained on a static batch
+      of
+      data.</li>
+    <li>A model trained on an event stream should take significantly less time to train than a model trained on a static
+      batch of data.</li>
+    <li>A model trained on an event stream can be updated without taking training offline.</li>
+  </ol>
+</div>
 {% endblock %}
