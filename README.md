@@ -47,4 +47,4 @@ Run docker container
 $ docker-compose up
 ```
 
-Go to http://localhost to view the application
+Go to http://localhost/8000 to view the application
