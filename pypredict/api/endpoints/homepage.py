@@ -15,30 +15,31 @@ class PredictionsSubscriber:
     PredictionsSubscriber subscribes to a predictions topic from Ensign.
     """
 
-    def __init__(self, topic="predictions"):
+    def __init__(self, websocket, topic="predictions"):
+        self.websocket = websocket
         self.topic = topic
         self.ensign = Ensign()
 
-    def run(self):
-        """
-        Run the subscriber forever.
-        """
-
-        asyncio.get_event_loop().run_until_complete(self.subscribe())
+    async def generate_price_info(self, event):
+        data = json.loads(event.data)
+        price_dict = dict()
+        price_dict["symbol"] = data["symbol"]
+        price_dict["price_pred"] = data["price_pred"]
+        price_dict["price"] = data["price"]
+        price_dict["time"] = data["time"]
+        await self.websocket.send_json(price_dict)
     
     async def subscribe(self):
         """
         Subscribe to trading events from Ensign and run an
         online model pipeline and publish predictions to a new topic.
         """
-
         # Get the topic ID from the topic name.
         topic_id = await self.ensign.topic_id(self.topic)
-
         # Subscribe to the topic.
-        # TODO: Handle dropped stream, but the SDK should really handle this.
-        async for event in self.ensign.subscribe(topic_id):
-            yield event
+        # self.generate_price_info is a callback function that gets executed when 
+        # a new event arrives in the topic
+        await self.ensign.subscribe(topic_id, on_event=self.generate_price_info)
               
 templates = Jinja2Templates(directory=config.TEMPLATE_DIR)
 router = APIRouter()
@@ -46,15 +47,12 @@ router = APIRouter()
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    subscriber = PredictionsSubscriber()
-    async for event in subscriber.subscribe():
-        data = json.loads(event.data)
-        price_dict = dict()
-        price_dict["symbol"] = data["symbol"]
-        price_dict["price_pred"] = data["price_pred"]
-        price_dict["price"] = data["price"]
-        price_dict["time"] = data["time"]
-        await websocket.send_json(price_dict)
+    subscriber = PredictionsSubscriber(websocket)
+    await subscriber.subscribe()
+    # create a Future and await its result - this will ensure that the
+    # subscriber will run forever since nothing in the code is setting the
+    # result of the Future
+    await asyncio.Future()
 
 @router.get("/")
 async def home(request: Request):

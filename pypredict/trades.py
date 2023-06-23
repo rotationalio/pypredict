@@ -7,7 +7,6 @@ from datetime import datetime
 import websockets
 from pyensign.events import Event
 from pyensign.ensign import Ensign
-from river import optim
 from river import compose
 from river import linear_model
 from river import preprocessing
@@ -46,11 +45,7 @@ class TradesPublisher:
         """
         Receive messages from the websocket and publish events to Ensign.
         """
-
-        # Ensure that the Ensign topic exists before publishing.
-        if not await self.ensign.topic_exists(self.topic):
-            await self.ensign.create_topic(self.topic)
-
+        topic_id = await self.ensign.topic_id(self.topic)
         while True:
             try:
                 async with websockets.connect(uri) as websocket:
@@ -60,7 +55,7 @@ class TradesPublisher:
                     while True:
                         message = await websocket.recv()
                         for event in self.message_to_events(json.loads(message)):
-                            await self.ensign.publish(self.topic, event, ack_callback=handle_ack, nack_callback=handle_nack)
+                            await self.ensign.publish(topic_id, event, on_ack=handle_ack, on_nack=handle_nack)
             except websockets.exceptions.ConnectionClosedError as e:
                 # TODO: Make sure reconnect is happening for dropped connections.
                 print(f"Websocket connection closed: {e}")
@@ -102,7 +97,6 @@ class TradesSubscriber:
         """
         Run the subscriber forever.
         """
-
         asyncio.get_event_loop().run_until_complete(self.subscribe())
 
     def build_model(self):
@@ -120,11 +114,12 @@ class TradesSubscriber:
         timestamp = datetime.fromtimestamp(epoch_time)
         return timestamp
     
-    async def run_model_pipeline(self, data):
+    async def run_model_pipeline(self, event):
         """
         Train an online model and publish predictions to a new topic.
         Run your super smart model pipeline here!
         """
+        data = json.loads(event.data)
         # convert unix epoch to datetime
         timestamp = self.get_timestamp(data["timestamp"])
         # extract the microsecond component and use it as a model feature
@@ -144,7 +139,9 @@ class TradesSubscriber:
 
         # create an Ensign event and publish to the predictions topic
         event = Event(json.dumps(message).encode("utf-8"), mimetype="application/json")
-        await self.ensign.publish(self.pub_topic, event, ack_callback=handle_ack, nack_callback=handle_nack)
+        # Get the topic ID from the topic name.
+        topic_id = await self.ensign.topic_id(self.pub_topic)
+        await self.ensign.publish(topic_id, event, on_ack=handle_ack, on_nack=handle_nack)
 
     async def subscribe(self):
         """
@@ -156,10 +153,13 @@ class TradesSubscriber:
         topic_id = await self.ensign.topic_id(self.sub_topic)
 
         # Subscribe to the topic.
-        # TODO: Handle dropped stream, but the SDK should really handle this.
-        async for event in self.ensign.subscribe(topic_id):
-            data = json.loads(event.data)
-            await self.run_model_pipeline(data)
+        # self.run_model_pipeline is a callback function that gets executed when 
+        # a new event arrives in the topic
+        await self.ensign.subscribe(topic_id, on_event=self.run_model_pipeline)
+        # create a Future and await its result - this will ensure that the
+        # subscriber will run forever since nothing in the code is setting the
+        # result of the Future
+        await asyncio.Future()
 
 if __name__ == "__main__":
     # Run the publisher or subscriber depending on the command line arguments.

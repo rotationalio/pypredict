@@ -1,6 +1,6 @@
 fastapi
 jinja2
-pyensign==0.7b0
-river>=0.17.0
+pyensign>=0.7.1b1
+river==0.17.0
 uvicorn
 websockets
