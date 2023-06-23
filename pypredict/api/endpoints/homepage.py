@@ -49,7 +49,9 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     subscriber = PredictionsSubscriber(websocket)
     await subscriber.subscribe()
-    # awaiting the Future means the coroutine will wait for the callback function to execute
+    # create a Future and await its result - this will ensure that the
+    # subscriber will run forever since nothing in the code is setting the
+    # result of the Future
     await asyncio.Future()
 
 @router.get("/")

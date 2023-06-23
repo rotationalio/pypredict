@@ -7,7 +7,6 @@ from datetime import datetime
 import websockets
 from pyensign.events import Event
 from pyensign.ensign import Ensign
-from river import optim
 from river import compose
 from river import linear_model
 from river import preprocessing
@@ -46,6 +45,7 @@ class TradesPublisher:
         """
         Receive messages from the websocket and publish events to Ensign.
         """
+        topic_id = await self.ensign.topic_id(self.topic)
         while True:
             try:
                 async with websockets.connect(uri) as websocket:
@@ -55,7 +55,7 @@ class TradesPublisher:
                     while True:
                         message = await websocket.recv()
                         for event in self.message_to_events(json.loads(message)):
-                            await self.ensign.publish(self.topic, event, ensure_exists=True, on_ack=handle_ack, on_nack=handle_nack)
+                            await self.ensign.publish(topic_id, event, on_ack=handle_ack, on_nack=handle_nack)
             except websockets.exceptions.ConnectionClosedError as e:
                 # TODO: Make sure reconnect is happening for dropped connections.
                 print(f"Websocket connection closed: {e}")
@@ -139,7 +139,9 @@ class TradesSubscriber:
 
         # create an Ensign event and publish to the predictions topic
         event = Event(json.dumps(message).encode("utf-8"), mimetype="application/json")
-        await self.ensign.publish(self.pub_topic, event, ensure_exists=True, on_ack=handle_ack, on_nack=handle_nack)
+        # Get the topic ID from the topic name.
+        topic_id = await self.ensign.topic_id(self.pub_topic)
+        await self.ensign.publish(topic_id, event, on_ack=handle_ack, on_nack=handle_nack)
 
     async def subscribe(self):
         """
@@ -154,7 +156,9 @@ class TradesSubscriber:
         # self.run_model_pipeline is a callback function that gets executed when 
         # a new event arrives in the topic
         await self.ensign.subscribe(topic_id, on_event=self.run_model_pipeline)
-        # awaiting the Future means the coroutine will wait for the callback function to execute
+        # create a Future and await its result - this will ensure that the
+        # subscriber will run forever since nothing in the code is setting the
+        # result of the Future
         await asyncio.Future()
 
 if __name__ == "__main__":
