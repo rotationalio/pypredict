@@ -18,7 +18,7 @@ $ source venv/bin/activate
 ### Install the required packages
 
 ```
-$ pip install -r pypredict/requirements.txt
+$ pip install -r requirements.txt
 ```
 
 ### Open three terminal windows
