@@ -60,7 +60,6 @@ class TradesPublisher:
                         for event in self.message_to_events(json.loads(message)):
                             await self.ensign.publish(self.topic, event, on_ack=handle_ack, on_nack=handle_nack)
             except websockets.exceptions.ConnectionClosedError as e:
-                # TODO: Make sure reconnect is happening for dropped connections.
                 logging.error(f"Websocket connection closed: {e}")
                 continue
 
