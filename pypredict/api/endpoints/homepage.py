@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 from fastapi import APIRouter
@@ -34,12 +33,8 @@ class PredictionsSubscriber:
         Subscribe to trading events from Ensign and run an
         online model pipeline and publish predictions to a new topic.
         """
-        # Get the topic ID from the topic name.
-        topic_id = await self.ensign.topic_id(self.topic)
-        # Subscribe to the topic.
-        # self.generate_price_info is a callback function that gets executed when 
-        # a new event arrives in the topic
-        await self.ensign.subscribe(topic_id, on_event=self.generate_price_info)
+        async for event in self.ensign.subscribe(self.topic):
+             await self.generate_price_info(event)
               
 templates = Jinja2Templates(directory=config.TEMPLATE_DIR)
 router = APIRouter()
@@ -49,10 +44,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     subscriber = PredictionsSubscriber(websocket)
     await subscriber.subscribe()
-    # create a Future and await its result - this will ensure that the
-    # subscriber will run forever since nothing in the code is setting the
-    # result of the Future
-    await asyncio.Future()
+
 
 @router.get("/")
 async def home(request: Request):
